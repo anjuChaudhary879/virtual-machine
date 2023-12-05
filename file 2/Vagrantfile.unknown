@@ -1,0 +1,27 @@
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/bionic64"
+  
+    # Display Vagrant version comparison before the machine comes up
+    config.trigger.before :up do
+      info = `vagrant --version`
+      latest_version = `vagrant version | grep Latest: | cut -d' ' -f2`
+      puts "Current Vagrant version: #{info}"
+      puts "Latest Vagrant version: #{latest_version}"
+    end
+  
+    # Create a file in /home/vagrant/state.file after the system is up
+    config.trigger.after :up do
+      config.vm.provision "shell", inline: "touch /home/vagrant/state.file"
+    end
+  
+    # Remove the state.file file before the system is halted
+    config.trigger.before :halt do
+      config.vm.provision "shell", inline: "rm -f /home/vagrant/state.file"
+    end
+  
+    # Remove the state.file file before the system is destroyed
+    config.trigger.before :destroy do
+      config.vm.provision "shell", inline: "rm -f /home/vagrant/state.file"
+    end
+  end
+  
